@@ -1,35 +1,10 @@
 
 % :- dynamic cliente/2.
+:- consult(menu).
+:- consult(list_utils).
+:- consult(input).
 
-teste():-
-    write("Olá mundo").
 
-
-menu():-
-    nl,
-    write(" Menu do programa: "),
-    nl,
-    write(" Digite a opção que deseja escolher."),
-    nl,
-    write(" 1 - Exibir as aplicações em que um cliente está investindo"),
-    nl,
-    write("SEGURE ctrl + D para sair."),
-    nl,
-    read(X),
-    opc(X),
-    menu().
-
-opc(X):-
-    X = 1,
-    
-    write("Digite o nome do cliente. Exemplo: ronaldinho_gaucho."),
-    nl,
-    read(C),
-    valida_nome_cliente(C),
-    exibe_aplicacoes_valores_cliente(C).
-    
-valida_nome_cliente(C):-
-    cliente(C,_,_,_,_,_,_,_,_).
 
 % cliente(nome,
 %         saldo,
@@ -48,6 +23,7 @@ valida_nome_cliente(C):-
 
 %  @TODO: Substituir estes valores com os valores reais (se nao forem os reais, estipular alguns)
 aplicacao(cdb, 6, 36, 5000, agressivo).
+aplicacao(lci, 6, 36, 5000, agressivo).
 aplicacao(tesouro_selic,1, 0, 30, conservador).
 aplicacao(tesouro_ipca, 5, 12,1000, moderado).
 aplicacao(poupanca, 0, 999,0, nao_recomendado).
@@ -56,17 +32,25 @@ nomes_aplicacoes([cdb, tesouro_selic, tesouro_ipca, poupanca]).
 % cliente(ronaldinho,5000,1000,5,12,[cdb,poupanca],[1000,20],conservador).
 cliente(ronaldinho,5000,1000,5,12,[cdb,poupanca],[1000,20],conservador,500).
 
-verif_pode_aplicar(VALOR_INVEST, PERFIL, [H|T]):-
-    
 
-onde_pode_aplicar(VALOR_INVEST,PERFIL):-
+% @TODO: FIXME, só está retornando 1
+verif_pode_aplicar(_, _, _, [], AUX, AUX).
 
+verif_pode_aplicar(VALOR_INVEST, PRAZO_RETORNO, PERFIL, [H|T], LISTA_ONDE, AUX):-
+    aplicacao(H, _, PRAZO_RETORNO, VAL, PERFIL),
+    VALOR_INVEST > VAL,
+    verif_pode_aplicar(VALOR_INVEST, PRAZO_RETORNO, PERFIL, T, LISTA_ONDE, [H|AUX]),!.
 
-exibe_valores_lista([]).
-exibe_valores_lista([H|T]):-
-    write(H),
-    nl,
-    exibe_valores_lista(T).
+verif_pode_aplicar(VALOR_INVEST, PRAZO_RETORNO, PERFIL, [_|T], LISTA_ONDE, AUX):-
+    verif_pode_aplicar(VALOR_INVEST, PRAZO_RETORNO, PERFIL, T, LISTA_ONDE, AUX),!.
+% verif_pode_aplicar(VALOR_INVEST, PRAZO_RETORNO, PERFIL, [H|T], LISTA_ONDE):-
+%     aplicacao(H, RET, PRZ, VAL, PERF),
+%     verif_pode_aplicar(VALOR_INVEST, PRAZO_RETORNO, PERFIL, T, LISTA_RETORNO).
+
+onde_pode_aplicar(VALOR_INVEST,PRAZO_RETORNO,PERFIL):-
+    nomes_aplicacoes(X),
+    verif_pode_aplicar(VALOR_INVEST, PRAZO_RETORNO, PERFIL,X, LISTA_ONDE, _),
+    exibe_valores_lista(LISTA_ONDE).
 
 exibe_aplicacao_valor([],[]).
 exibe_aplicacao_valor([H|T], [H1|T1]):-
@@ -77,14 +61,9 @@ exibe_aplicacao_valor([H|T], [H1|T1]):-
     nl,
     exibe_aplicacao_valor(T,T1).
 
-tamanho_lista([],0).
-tamanho_lista([H|T],TAM):-
-    tamanho_lista(T, T1),
-    TAM is T1 + 1.
-
 % nao esta aplicando
 verifica_aplicacoes(C):-
-    cliente(C,S,R, D, P, T, QT, PERF,_),
+    cliente(C,_,_,_,_, T,_,_,_),
     write(T),
     nl,
     exibe_valores_lista(T),
@@ -94,8 +73,8 @@ verifica_aplicacoes(C):-
     write(TAM).
 
 v_ronaldinho():-
-    cliente(ronaldinho,S,R, D, P, T, QT, PERF,_),
-    valor_minimo_perfil_moderado(S,R,D).
+    cliente(ronaldinho,S,R, D, _, _, _, _,_),
+    valor_minimo_investimento(S,R,D).
 
 valor_minimo_investimento(SALDO,RENDA,DEP):-
     minimo_dependentes(DEP,MIN),
@@ -111,7 +90,7 @@ minimo_dependentes(DEP,MIN):-
 % exibe_renda_adequada(C):-
 
 
-verifica_fundo_emergencia(SALDO, RENDA, DEPENDENTES, DESPESA, SOBRA, APLIC, QT_APLIC):-
+verifica_fundo_emergencia(_, _, DEPENDENTES, DESPESA, SOBRA, APLIC, QT_APLIC):-
     DESPESA_SEIS_MESES is DESPESA * 6,
     minimo_dependentes(DEPENDENTES, MINDEP),
     DESPESA_SEIS_MESES_DEP is MINDEP * 6,
@@ -123,7 +102,9 @@ verifica_fundo_emergencia(SALDO, RENDA, DEPENDENTES, DESPESA, SOBRA, APLIC, QT_A
     write(SOBRA),
     write(" de diferença do mínimo que precisaria para sobreviver por seis meses!"). % aqui avisar que pode investir em mais??
 
-verifica_fundo_emergencia(SALDO, RENDA, DEPENDENTES, DESPESA, SOBRA,APLIC, QT_APLIC):-
+
+%se tiver saldo, avisar que poderia aplicar nestas aplicações (as de perfil de emergência)
+verifica_fundo_emergencia(_, _, DEPENDENTES, DESPESA, SOBRA,APLIC, QT_APLIC):-
     DESPESA_SEIS_MESES is DESPESA * 6,
     minimo_dependentes(DEPENDENTES, MINDEP),
     DESPESA_SEIS_MESES_DEP is MINDEP * 6,
@@ -136,14 +117,14 @@ verifica_fundo_emergencia(SALDO, RENDA, DEPENDENTES, DESPESA, SOBRA,APLIC, QT_AP
     write(" reais para você atingir seu fundo de emergência!"). % aqui avisar que pode investir em mais??
     
 ronal():-
-    cliente(ronaldinho,SALDO, R_A, DEP, PRAZ, APLIC, QT_APLIC, PERF, DESP),
+    cliente(ronaldinho,SALDO, R_A, DEP, _, APLIC, QT_APLIC, _, DESP),
     % pega_aplicacao_valor(cdb, APLIC, QT_APLIC, A, V),
     % write(A),
     % nl,
     % write(V),
     % soma_aplicacoes([cdb,tesouro_selic],APLIC,QT_APLIC,SOMA),
     % nl,
-    verifica_fundo_emergencia(SALDO, R_A, DEP, DESP, SOBRA, APLIC, QT_APLIC).
+    verifica_fundo_emergencia(SALDO, R_A, DEP, DESP, _, APLIC, QT_APLIC).
     % write(SOMA).
 
 soma_aplicacoes([],_,_,0).
@@ -154,11 +135,11 @@ soma_aplicacoes([H|T],A,QT,SOMA):-
 
 pega_aplicacao_valor(_, [], [],_,0).
 pega_aplicacao_valor(A, [A], [A1],A,A1).
-pega_aplicacao_valor(A, [H|T], [H1|T1], APLIC, VAL):-
+pega_aplicacao_valor(A, [H|_], [H1|_], APLIC, VAL):-
     A = H,
     APLIC = H,
     VAL is H1.
-pega_aplicacao_valor(A, [H|T], [H1|T1], APLIC, VAL):-
+pega_aplicacao_valor(A, [_|T], [_|T1], APLIC, VAL):-
     pega_aplicacao_valor(A, T, T1, APLIC, VAL).
 
 
@@ -170,18 +151,8 @@ exibe_aplicacoes_valores_cliente(C):-
     exibe_aplicacao_valor(T,QT).
 
 
-le_cliente():-
-    write("Digite o nome do cliente"),
-    nl,
-    read(X),
-    write("Digite quanto ele possui de saldo no banco"),
-    nl,
-    read(Y),
-    assertz(cliente(X,Y)),
-    exibe_info(X).
-
 exibe_info(X):-
     write(X),
     nl,
-    cliente(X,Y),
+    cliente(X,Y,_,_,_,_,_,_,_),
     write(Y).
