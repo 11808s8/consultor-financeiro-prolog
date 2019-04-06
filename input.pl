@@ -9,3 +9,5 @@ le_cliente():-
     read(Y),
     assertz(cliente(X,Y)),
     exibe_info(X).
+
+

@@ -3,12 +3,13 @@
 :- consult(menu).
 :- consult(list_utils).
 :- consult(input).
+:- consult(questionario).
 
 
 
 % cliente(nome,
 %         saldo,
-%         renda_anual, 
+%         renda_mensal, 
 %         dependentes,
 %         prazo_retorno_investimento,
 %         [aplicacoes],
@@ -27,13 +28,16 @@ aplicacao(lci, 6, 36, 5000, agressivo).
 aplicacao(tesouro_selic,1, 0, 30, conservador).
 aplicacao(tesouro_ipca, 5, 12,1000, moderado).
 aplicacao(poupanca, 0, 999,0, nao_recomendado).
-nomes_aplicacoes([cdb, tesouro_selic, tesouro_ipca, poupanca]).
+nomes_aplicacoes([cdb,lci, tesouro_selic, tesouro_ipca, poupanca]).
 
 % cliente(ronaldinho,5000,1000,5,12,[cdb,poupanca],[1000,20],conservador).
 cliente(ronaldinho,5000,1000,5,12,[cdb,poupanca],[1000,20],conservador,500).
 
 
-% @TODO: FIXME, só está retornando 1
+% @TODO: DEFINIR UM METODO DE EXIBIR DIVERSIFICAÇÃO DE INVESTIMENTOS caso o cliente possua a renda suficiente
+% @TODO: OU dizer quanto ele pode investir em cada um.
+
+% Retorna uma lista de onde o cliente poderá aplicar
 verif_pode_aplicar(_, _, _, [], AUX, AUX).
 
 verif_pode_aplicar(VALOR_INVEST, PRAZO_RETORNO, PERFIL, [H|T], LISTA_ONDE, AUX):-
@@ -43,9 +47,6 @@ verif_pode_aplicar(VALOR_INVEST, PRAZO_RETORNO, PERFIL, [H|T], LISTA_ONDE, AUX):
 
 verif_pode_aplicar(VALOR_INVEST, PRAZO_RETORNO, PERFIL, [_|T], LISTA_ONDE, AUX):-
     verif_pode_aplicar(VALOR_INVEST, PRAZO_RETORNO, PERFIL, T, LISTA_ONDE, AUX),!.
-% verif_pode_aplicar(VALOR_INVEST, PRAZO_RETORNO, PERFIL, [H|T], LISTA_ONDE):-
-%     aplicacao(H, RET, PRZ, VAL, PERF),
-%     verif_pode_aplicar(VALOR_INVEST, PRAZO_RETORNO, PERFIL, T, LISTA_RETORNO).
 
 onde_pode_aplicar(VALOR_INVEST,PRAZO_RETORNO,PERFIL):-
     nomes_aplicacoes(X),
