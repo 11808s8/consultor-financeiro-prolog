@@ -20,7 +20,7 @@ grafico_questionario(A1,B1,C1, QTD_RESPOSTAS) :-
 
 
 questionario_perfil(CLIENTE):-
-    cliente(CLIENTE,_,_,_,_,_,_,_,_),
+    cliente(CLIENTE,_,_,_,_,_,_,_,PERFIL),
     nl,
     nl,
     write("Olá "),
@@ -102,63 +102,89 @@ questionario_perfil(CLIENTE):-
     read(CINCO),
     nl,
     nl,
-    respostas_questionario([UM,DOIS,TRES,QUATRO,CINCO],A,B,C),
+    respostas_questionario([UM,DOIS,TRES,QUATRO,CINCO],A,B,C, NOVO_PERFIL),
     nl,
-    write("Deseja ver um gráfico com suas respostas?(s/n)"),
+    % prepara_grafico_questionario([UM,DOIS,TRES,QUATRO,CINCO], A,B,C),
     nl,
-    read(VER),
-    pergunta_grafico_questionario([UM,DOIS,TRES,QUATRO,CINCO], VER, A,B,C).
+    pergunta_adicionar_perfil_a_base(CLIENTE,PERFIL, NOVO_PERFIL).
     
 
-pergunta_grafico_questionario(RESPOSTAS, VER,A,B,C):-
-    VER = s,
+pergunta_adicionar_perfil_a_base(CLIENTE, PERFIL, NOVO_PERFIL):-
+    nl,
+    write("Deseja adicionar o perfil de investimento ao seu perfil?(S/N)"),
+    read(RESP),
+    prepara_adicionar_perfil_a_base(RESP, CLIENTE, PERFIL, NOVO_PERFIL).
+
+prepara_adicionar_perfil_a_base(RESP, CLIENTE, PERFIL,NOVO_PERFIL):-
+    RESP = "S",
+    PERFIL \= "",
+    nl,
+    write("Seu perfil já possui o perfil de investimento "),
+    write(PERFIL),
+    write(" atrelado a ele. Deseja sobrescrevê-lo? (S/N)"),
+    nl,
+    read(SOBRESCREVER),
+    prepara_sobrescrever_adicionar_perfil_a_base(SOBRESCREVER, CLIENTE, NOVO_PERFIL).
+
+prepara_adicionar_perfil_a_base(RESP, CLIENTE, PERFIL,NOVO_PERFIL):-
+    RESP = "S",
+    PERFIL = "", % teste redundante...
+    nl,
+    prepara_sobrescrever_adicionar_perfil_a_base("S", CLIENTE, NOVO_PERFIL).
+
+prepara_adicionar_perfil_a_base(RESP, CLIENTE, PERFIL,NOVO_PERFIL):-
+    RESP = "N",
+    nl,
+    write("Sem problemas! Retornando ao menu.").
+
+prepara_sobrescrever_adicionar_perfil_a_base(SOBRESCREVER, CLIENTE, NOVO_PERFIL):-
+    SOBRESCREVER = "S",
+    cliente(CLIENTE,A,B,C,D,E,F,G,_),
+    retract(cliente(CLIENTE,_,_,_,_,_,_,_,_)),
+    assert(cliente(CLIENTE,A,B,C,D,E,F,NOVO_PERFIL,G)),
+    nl,
+    write("Perfil de investimento alterado com sucesso!").
+prepara_sobrescrever_adicionar_perfil_a_base(SOBRESCREVER, CLIENTE, NOVO_PERFIL):-
+    SOBRESCREVER = "N",
+    nl,
+    write("Sem problemas! Retornando ao menu.").
+
+prepara_grafico_questionario(RESPOSTAS,A,B,C):-
     tamanho_lista(RESPOSTAS, TAMANHO_LISTA),
     grafico_questionario(A,B,C,TAMANHO_LISTA).
 
-pergunta_grafico_questionario(RESPOSTAS, VER,A,B,C):-
-    VER = "S",
-    tamanho_lista(RESPOSTAS, TAMANHO_LISTA),
-    grafico_questionario(A,B,C,TAMANHO_LISTA).
-
-pergunta_grafico_questionario(RESPOSTAS, VER,A,B,C):-
-    VER = "N",
-    write("Sem problemas! Retornando ao menu.").
-pergunta_grafico_questionario(RESPOSTAS, VER,A,B,C):-
-    VER = n,
-    write("Sem problemas! Retornando ao menu.").
-
-respostas_questionario(RESPOSTAS,A,B,C):-
+respostas_questionario(RESPOSTAS,A,B,C, NOVO_PERFIL):-
     quantifica_respostas_questionarios(RESPOSTAS,A,B,C),
-    compara_respostas(A,B,C,AUX).
+    compara_respostas(A,B,C,NOVO_PERFIL).
 
 % @TODO: Adicionar TEXTO sobre perfis
 compara_respostas(A,B,C,AUX):-
     A>B,
     A>C,
-    AUX = a,
+    AUX = conservador,
     write("Conservador").
 compara_respostas(A,B,C,AUX):-
     B>A,
     B>C,
-    AUX = b,
+    AUX = moderado,
     write("Moderado").
 compara_respostas(A,B,C,AUX):-
     C>A,
     C>B,
-    AUX = c,
+    AUX = agressivo,
     write("Agressivo").
-compara_respostas(A,B,C,AUX):-
-    A=B,
-    AUX = d,
-    write("Conservador Moderado"). % ab
-compara_respostas(A,B,C,AUX):-
-    B=C,
-    AUX = e,
-    write("Moderado tendendo para agressivo"). % bc
-compara_respostas(A,B,C,AUX):-
-    A=C,
-    AUX = f,
-    write("Conservador e agressivo."). % ac
+% compara_respostas(A,B,C,AUX):-
+%     A=B,
+%     AUX = d,
+%     write("Conservador Moderado"). % ab
+% compara_respostas(A,B,C,AUX):-
+%     B=C,
+%     AUX = e,
+%     write("Moderado tendendo para agressivo"). % bc
+% compara_respostas(A,B,C,AUX):-
+%     A=C,
+%     AUX = f,
+%     write("Conservador e agressivo."). % ac
     
 quantifica_respostas_questionarios([],0,0,0).
 quantifica_respostas_questionarios([H|T],A,B,C):-

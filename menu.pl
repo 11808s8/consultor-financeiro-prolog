@@ -13,6 +13,12 @@ menu():-
     nl,
     write(" 4 - Não conhece seu perfil de investidor? Responda este questionário e descubra!"),
     nl,
+    write(" 5 - Ver informações de um cliente."),
+    nl,
+    write(" 6 - Adicionar cliente."),
+    nl,
+    write(" 7 - Onde aplicar?"),
+    nl,
     write("SEGURE ctrl + D para sair."),
     nl,
     read(X),
@@ -39,9 +45,80 @@ opc(X):-
 opc(X):-
     X = 4,
     leitura_nome_cliente(C),
-    cliente(C,_,_,_, _, _, _, _,_), % @TODO: COLOCAR AQUI UMA OPÇÃO PARA SUBSTITUIR O PERFIL SE QUISER
+    cliente(C,_,_,_, _, _, _, _,_), 
     questionario_perfil(C).
 
+opc(X):-
+    X = 5,
+    leitura_nome_cliente(C),
+    cliente(C,SALDO,RENDA_MENSAL,DEPENDENTES,PRAZO_RETORNO,APLICACOES,QUANTIA,PERFIL,DESPESA), 
+    write("Nome do cliente: "),
+    write(C),
+    nl,
+    write("Saldo do cliente:"),
+    write(SALDO),
+    nl,
+    write("Renda mensal:"),
+    write(RENDA_MENSAL),
+    nl,
+    write("Quantidade dependentes:"),
+    write(DEPENDENTES),
+    nl,
+    write("Prazo de retorno:"),
+    write(PRAZO_RETORNO),
+    nl,
+    write("Aplicações e quantia em cada aplicacao:"),
+    nl,
+    write(APLICACOES),
+    nl,
+    write(QUANTIA),
+    nl,
+    write("Perfil de investidor:"),
+    write(PERFIL),
+    nl,
+    write("Despesas mensais:"),
+    write(DESPESA),
+    nl.
+
+opc(X):-
+    X = 6,
+    write("Nome do cliente: "),
+    nl,
+    read(C),
+    write("Saldo do cliente:"),
+    nl,
+    read(SALDO),
+    write("Renda mensal:"),
+    nl,
+    read(RENDA_MENSAL),
+    write("Quantidade dependentes:"),
+    nl,
+    read(DEPENDENTES),
+    write("Prazo de retorno:"),
+    nl,
+    read(PRAZO_RETORNO),
+    write("Aplicações:"),
+    nl,
+    read(APLICACOES),
+    write("Quantia em cada aplicacao:"),
+    nl,
+    read(QUANTIA),
+    write("Perfil de investidor:"),
+    nl,
+    read(PERFIL),
+    write("Despesas mensais:"),
+    nl,
+    read(DESPESA),
+    assert(cliente(C,SALDO,RENDA_MENSAL,DEPENDENTES,PRAZO_RETORNO,APLICACOES,QUANTIA,PERFIL,DESPESA)),
+    write("Usuário adicionado com sucesso!"),
+    nl. 
+
+opc(X):-
+    X = 7,
+    leitura_nome_cliente(C),
+    cliente(C,SALDO,_,_,PRAZO_RETORNO,_,_,PERFIL,_), 
+    onde_pode_aplicar(SALDO,PRAZO_RETORNO,PERFIL, C).
+    
 
 leitura_nome_cliente(C):-
     write("Digite o nome do cliente. Exemplo: ronaldinho_gaucho."),
@@ -56,7 +133,8 @@ leitura_nome_cliente(C):-
 %         prazo_retorno_investimento,
 %         [aplicacoes],
 %         [quantia_aplicada_em_cada_aplicacao],
-%         perfil)
+%         perfil,
+%         despesa)
 
 valida_nome_cliente(C):-
     cliente(C,_,_,_,_,_,_,_,_).

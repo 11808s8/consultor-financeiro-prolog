@@ -11,7 +11,8 @@
 %         prazo_retorno_investimento,
 %         [aplicacoes],
 %         [quantia_aplicada_em_cada_aplicacao],
-%         perfil)
+%         perfil,
+%         DESPESA)
 
 % aplicacao(nome,
             % rendimento,
@@ -27,6 +28,9 @@ aplicacao(tesouro_ipca, 5, 12,1000, moderado).
 aplicacao(poupanca, 0, 999,0, nao_recomendado).
 nomes_aplicacoes([cdb,lci, tesouro_selic, tesouro_ipca, poupanca]).
 
+% Testei cor a cor até chegar nessas
+cores([red,blue,green,yellow,gray,black,brown,cyan,violet]).
+
 % cliente(ronaldinho,5000,1000,5,12,[cdb,poupanca],[1000,20],conservador).
 cliente(ronaldinho,5000,1000,5,12,[cdb,poupanca],[1000,20],conservador,500).
 
@@ -34,17 +38,59 @@ cliente(ronaldinho,5000,1000,5,12,[cdb,poupanca],[1000,20],conservador,500).
 % @TODO: DEFINIR UM METODO DE EXIBIR DIVERSIFICAÇÃO DE INVESTIMENTOS caso o cliente possua a renda suficiente
 % @TODO: OU dizer quanto ele pode investir em cada um.
 
-onde_pode_aplicar(VALOR_INVEST,PRAZO_RETORNO,PERFIL):-
+
+% @TODO: VERIFICAR SE O CLIENTE JÁ POSSUI UM INVESTIMENTO EM DETERMINADA APLICAÇÃO
+%        SE POSSUIR, ADICIONAR MAIS NELA
+onde_pode_aplicar(VALOR_INVEST,PRAZO_RETORNO,PERFIL, CLIENTE):-
     nomes_aplicacoes(X),
     verif_pode_aplicar(VALOR_INVEST, PRAZO_RETORNO, PERFIL,X, LISTA_ONDE, _),
-    exibe_valores_lista(LISTA_ONDE).
+    exibe_valores_lista(LISTA_ONDE),
+    write("Deseja aplicar diversificado nestas aplicações?(S/N)"),
+    nl,
+    read(RESPOSTA),
+    pergunta_aplicar_diversificado_em(RESPOSTA,LISTA_ONDE, CLIENTE).
+
+pergunta_aplicar_diversificado_em(RESPOSTA,LISTA_ONDE, CLIENTE):-
+    RESPOSTA = "S",
+    write("Quanto deseja investir?"),
+    nl,
+    read(QUANTO),
+    calcula_quanto(LISTA_ONDE, CLIENTE,QUANTO).
+calcula_quanto(LISTA_ONDE, CLIENTE,QUANTO):-
+    cliente(CLIENTE,SALDO,_,_,_,_,_,_,_),
+    QUANTO=<SALDO,
+    aplicar_diversificado_em(QUANTO,LISTA_ONDE,CLIENTE),
+    write("Aplicação realizada com sucesso!").
+calcula_quanto(LISTA_ONDE, CLIENTE,QUANTO):-
+    cliente(CLIENTE,SALDO,_,_,_,_,_,_,_),
+    QUANTO>SALDO,
+    write("Você não possui esta quantia! Seu saldo é de: "),
+    write("R$"),
+    write(SALDO).
+
+aplicar_diversificado_em(VALOR_INVEST, LISTA_ONDE, CLIENTE):-
+    tamanho_lista(LISTA_ONDE, TAM),
+    QUANTO_EM_CADA is VALOR_INVEST/TAM,
+    cliente(CLIENTE,SAL,REND,DEP,PRAZO,APLIC,QT_APLIC,P,D),
+    append(APLIC,LISTA_ONDE,APLIC1),
+    retract(cliente(CLIENTE,_,_,_,_,_,_,_,_)),
+    insere_investimento_lista(LISTA_ONDE,LISTA_VALORES,QUANTO_EM_CADA),
+    SAL1 is SAL - VALOR_INVEST,
+    append(QT_APLIC,LISTA_VALORES,QT_APLIC_FINAL),
+    assert(cliente(CLIENTE,SAL1,REND,DEP,PRAZO,APLIC1,QT_APLIC_FINAL,P,D)).
+
+insere_investimento_lista([],[],_).
+insere_investimento_lista([H|T], AUX,VAL):-
+    insere_investimento_lista(T, AUX1,VAL),
+    insere_lista(AUX1,VAL,AUX).
 
 % Retorna uma lista de onde o cliente poderá aplicar
 verif_pode_aplicar(_, _, _, [], AUX, AUX).
 
 verif_pode_aplicar(VALOR_INVEST, PRAZO_RETORNO, PERFIL, [H|T], LISTA_ONDE, AUX):-
-    aplicacao(H, _, PRAZO_RETORNO, VAL, PERFIL),
+    aplicacao(H, _, P_R, VAL, PERFIL),
     VALOR_INVEST > VAL,
+    PRAZO_RETORNO >= P_R,
     verif_pode_aplicar(VALOR_INVEST, PRAZO_RETORNO, PERFIL, T, LISTA_ONDE, [H|AUX]),!.
 
 verif_pode_aplicar(VALOR_INVEST, PRAZO_RETORNO, PERFIL, [_|T], LISTA_ONDE, AUX):-
@@ -122,16 +168,39 @@ pega_aplicacao_valor(A, [_|T], [_|T1], APLIC, VAL):-
     pega_aplicacao_valor(A, T, T1, APLIC, VAL).
 
 
-%@TODO: ADICIONAR UM GRÀFICO
+
 exibe_aplicacoes_valores_cliente(C):-
     cliente(C,_,_,_,_, T, QT,_,_),
     write("Você está investindo em: "),
     nl,
-    exibe_aplicacao_valor(T,QT).
-
+    exibe_aplicacao_valor(T,QT),
+    nl,
+    cores(CORES),
+    monta_barras(T,QT,CORES,LISTA_FINAL),
+    nomes_aplicacoes(X),
+    soma_aplicacoes(X,T,QT,SOMA),
+    grafico_aplicacoes(LISTA_FINAL,SOMA).
 
 exibe_info(X):-
     write(X),
     nl,
     cliente(X,Y,_,_,_,_,_,_,_),
     write(Y).
+
+
+grafico_aplicacoes(LISTA_MEMBROS,TOTAL) :-
+    new(W,  auto_sized_picture('Respostas do Questionário')),
+    send(W, display, new(BC, bar_chart(horizontal,0,TOTAL))),
+    forall(member(Name/Height/Color,
+              LISTA_MEMBROS),
+           (   new(B, bar(Name, Height)),
+               send(B, colour(Color)),
+               send(BC, append, B)
+           )),
+    send(W, open).
+
+% monta_barras(LISTA_NOMES_APLICACOES, LISTA_QUANTIDADE_APLICACOES, LISTA_NOMES_CORES, LISTA_FINAL):-
+monta_barras([], _, _, _).
+monta_barras([H|T], [H1|T1], [H2|T2], LISTA_FINAL):-
+    monta_barras(T,T1,T2,LISTA_FINAL1),
+    append(LISTA_FINAL1,[H/H1/H2],LISTA_FINAL). 
