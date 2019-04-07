@@ -4,6 +4,12 @@
 :- consult(list_utils).
 :- consult(input).
 :- consult(questionario).
+
+% @TODO MASSIVE: COLOCAR A PORCENTAGEM DA APLICACAO QUE VAI AUMENTAR.
+%  POR EXEMPLO CDB 1.2 AI QUANDO O CARA APLICA AVISA PRA ELE QUE ELE TERA UM LUCRO DE ... DEPOIS DE X
+%  MESES!
+
+
 % cliente(nome,
 %         saldo,
 %         renda_mensal, 
