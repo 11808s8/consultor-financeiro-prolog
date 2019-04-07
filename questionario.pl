@@ -21,6 +21,8 @@ grafico_questionario(A1,B1,C1, QTD_RESPOSTAS) :-
 
 questionario_perfil(CLIENTE):-
     cliente(CLIENTE,_,_,_,_,_,_,_,_),
+    nl,
+    nl,
     write("Olá "),
     write(CLIENTE),
     write(". Faremos agora um questionário para descobrir seu perfil de investimento."),
@@ -100,13 +102,34 @@ questionario_perfil(CLIENTE):-
     read(CINCO),
     nl,
     nl,
-    respostas_questionario([UM,DOIS,TRES,QUATRO,CINCO]).
+    respostas_questionario([UM,DOIS,TRES,QUATRO,CINCO],A,B,C),
+    nl,
+    write("Deseja ver um gráfico com suas respostas?(s/n)"),
+    nl,
+    read(VER),
+    pergunta_grafico_questionario([UM,DOIS,TRES,QUATRO,CINCO], VER, A,B,C).
     
-respostas_questionario(RESPOSTAS):-
-    quantifica_respostas_questionarios(RESPOSTAS,A,B,C),
-    compara_respostas(A,B,C,AUX),
+
+pergunta_grafico_questionario(RESPOSTAS, VER,A,B,C):-
+    VER = s,
     tamanho_lista(RESPOSTAS, TAMANHO_LISTA),
     grafico_questionario(A,B,C,TAMANHO_LISTA).
+
+pergunta_grafico_questionario(RESPOSTAS, VER,A,B,C):-
+    VER = "S",
+    tamanho_lista(RESPOSTAS, TAMANHO_LISTA),
+    grafico_questionario(A,B,C,TAMANHO_LISTA).
+
+pergunta_grafico_questionario(RESPOSTAS, VER,A,B,C):-
+    VER = "N",
+    write("Sem problemas! Retornando ao menu.").
+pergunta_grafico_questionario(RESPOSTAS, VER,A,B,C):-
+    VER = n,
+    write("Sem problemas! Retornando ao menu.").
+
+respostas_questionario(RESPOSTAS,A,B,C):-
+    quantifica_respostas_questionarios(RESPOSTAS,A,B,C),
+    compara_respostas(A,B,C,AUX).
 
 % @TODO: Adicionar TEXTO sobre perfis
 compara_respostas(A,B,C,AUX):-
