@@ -56,6 +56,11 @@ pergunta_aplicar_diversificado_em(RESPOSTA,LISTA_ONDE, CLIENTE):-
     nl,
     read(QUANTO),
     calcula_quanto(LISTA_ONDE, CLIENTE,QUANTO).
+
+pergunta_aplicar_diversificado_em(RESPOSTA,LISTA_ONDE, CLIENTE):-
+    RESPOSTA = "N",
+    write("Tudo bem! Retornando ao menu").
+
 calcula_quanto(LISTA_ONDE, CLIENTE,QUANTO):-
     cliente(CLIENTE,SALDO,_,_,_,_,_,_,_),
     QUANTO=<SALDO,
