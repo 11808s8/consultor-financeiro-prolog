@@ -13,3 +13,27 @@ tamanho_lista([_|T],TAM):-
 % insere_lista([],X,[X]).
 insere_lista(L,VAL,RESULTADO):-
     append(L,[VAL], RESULTADO),!.
+
+exibe_aplicacao_valor([],[]).
+exibe_aplicacao_valor([H|T], [H1|T1]):-
+    write("Aplicação: "),
+    write(H),
+    write(". Valor: R$"),
+    write(H1),
+    nl,
+    exibe_aplicacao_valor(T,T1).
+
+soma_aplicacoes([],_,_,0).
+soma_aplicacoes([H|T],A,QT,SOMA):-
+    pega_aplicacao_valor(H,A,QT,_,VAL),
+    soma_aplicacoes(T,A,QT,S1),
+    SOMA is S1 + VAL,!.
+
+pega_aplicacao_valor(_, [], [],_,0).
+pega_aplicacao_valor(A, [A], [A1],A,A1).
+pega_aplicacao_valor(A, [H|_], [H1|_], APLIC, VAL):-
+    A = H,
+    APLIC = H,
+    VAL is H1.
+pega_aplicacao_valor(A, [_|T], [_|T1], APLIC, VAL):-
+    pega_aplicacao_valor(A, T, T1, APLIC, VAL),!.

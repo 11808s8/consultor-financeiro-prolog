@@ -1,26 +1,5 @@
-:- use_module(library('plot/barchart')).
-:- use_module(library(autowin)).
-:- use_module(library(pce)).
-
-% Referências para o gráfico de barras:
-% https://github.com/SWI-Prolog/packages-xpce/blob/master/prolog/lib/plot/demo.pl
-% http://www.swi-prolog.org/packages/xpce/UserGuide/libplot.html#sec:11.6
-
-% Está plotando na horizontal pois na vertical não consegui fazer a legenda do eixo X aparecer
-grafico_questionario(A1,B1,C1, QTD_RESPOSTAS) :-
-    new(W,  auto_sized_picture('Respostas do Questionário')),
-    send(W, display, new(BC, bar_chart(horizontal,0,QTD_RESPOSTAS))),
-    forall(member(Name/Height/Color,
-              [a/A1/red, b/B1/green, c/C1/blue]),
-           (   new(B, bar(Name, Height)),
-               send(B, colour(Color)),
-               send(BC, append, B)
-           )),
-    send(W, open).
-
-
 questionario_perfil(CLIENTE):-
-    cliente(CLIENTE,_,_,_,_,_,_,_,PERFIL),
+    cliente(CLIENTE,_,_,_,_,_,_,PERFIL,_),
     nl,
     nl,
     write("Olá "),
@@ -111,41 +90,41 @@ questionario_perfil(CLIENTE):-
 
 pergunta_adicionar_perfil_a_base(CLIENTE, PERFIL, NOVO_PERFIL):-
     nl,
-    write("Deseja adicionar o perfil de investimento ao seu perfil?(S/N)"),
+    write("Deseja adicionar o perfil de investimento ao seu perfil?(s/n)"),
     read(RESP),
-    prepara_adicionar_perfil_a_base(RESP, CLIENTE, PERFIL, NOVO_PERFIL).
+    prepara_adicionar_perfil_a_base(RESP, CLIENTE, PERFIL, NOVO_PERFIL),!.
 
 prepara_adicionar_perfil_a_base(RESP, CLIENTE, PERFIL,NOVO_PERFIL):-
-    RESP = "S",
+    RESP = s,
     PERFIL \= "",
     nl,
     write("Seu perfil já possui o perfil de investimento "),
     write(PERFIL),
-    write(" atrelado a ele. Deseja sobrescrevê-lo? (S/N)"),
+    write(" atrelado a ele. Deseja sobrescrevê-lo? (s/n)"),
     nl,
     read(SOBRESCREVER),
-    prepara_sobrescrever_adicionar_perfil_a_base(SOBRESCREVER, CLIENTE, NOVO_PERFIL).
+    prepara_sobrescrever_adicionar_perfil_a_base(SOBRESCREVER, CLIENTE, NOVO_PERFIL),!.
 
 prepara_adicionar_perfil_a_base(RESP, CLIENTE, PERFIL,NOVO_PERFIL):-
-    RESP = "S",
+    RESP = s,
     PERFIL = "", % teste redundante...
     nl,
-    prepara_sobrescrever_adicionar_perfil_a_base("S", CLIENTE, NOVO_PERFIL).
+    prepara_sobrescrever_adicionar_perfil_a_base(s, CLIENTE, NOVO_PERFIL).
 
 prepara_adicionar_perfil_a_base(RESP, CLIENTE, PERFIL,NOVO_PERFIL):-
-    RESP = "N",
+    RESP = n,
     nl,
     write("Sem problemas! Retornando ao menu.").
 
 prepara_sobrescrever_adicionar_perfil_a_base(SOBRESCREVER, CLIENTE, NOVO_PERFIL):-
-    SOBRESCREVER = "S",
-    cliente(CLIENTE,A,B,C,D,E,F,G,_),
+    SOBRESCREVER = s,
+    cliente(CLIENTE,A,B,C,D,E,F,_,G),
     retract(cliente(CLIENTE,_,_,_,_,_,_,_,_)),
     assert(cliente(CLIENTE,A,B,C,D,E,F,NOVO_PERFIL,G)),
     nl,
     write("Perfil de investimento alterado com sucesso!").
 prepara_sobrescrever_adicionar_perfil_a_base(SOBRESCREVER, CLIENTE, NOVO_PERFIL):-
-    SOBRESCREVER = "N",
+    SOBRESCREVER = n,
     nl,
     write("Sem problemas! Retornando ao menu.").
 

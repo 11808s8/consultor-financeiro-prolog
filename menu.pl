@@ -19,11 +19,17 @@ menu():-
     nl,
     write(" 7 - Onde aplicar?"),
     nl,
-    write("SEGURE ctrl + D para sair."),
+    write(" 8 - Quanto lucrarei nas aplicações que tenho?"),
+    nl,
+    write(" 0 - Para sair."),
     nl,
     read(X),
     opc(X),
     menu().
+
+opc(X):-
+    X = 0,
+    halt.
 
 opc(X):-
     X = 1,
@@ -119,6 +125,12 @@ opc(X):-
     cliente(C,SALDO,_,_,PRAZO_RETORNO,_,_,PERFIL,_), 
     onde_pode_aplicar(SALDO,PRAZO_RETORNO,PERFIL, C).
     
+opc(X):-
+    X = 8,
+    leitura_nome_cliente(C),
+    quanto_lucrarei(C).
+    
+
 
 leitura_nome_cliente(C):-
     write("Digite o nome do cliente. Exemplo: ronaldinho_gaucho."),
