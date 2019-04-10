@@ -39,8 +39,8 @@ opc(X):-
 opc(X):-
     X = 2,
     leitura_nome_cliente(C),
-    cliente(C,SALDO, R_A, DEP, _, APLIC, QT_APLIC, _, DESP),
-    verifica_fundo_emergencia(SALDO, R_A, DEP, DESP, _, APLIC, QT_APLIC).
+    cliente(C,_,_, DEP, _, APLIC, QT_APLIC, _, DESP),
+    verifica_fundo_emergencia( DEP, DESP, _, APLIC, QT_APLIC).
     
 opc(X):-
     X = 3,
