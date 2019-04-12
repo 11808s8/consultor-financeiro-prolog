@@ -2,10 +2,12 @@
 :- dynamic cliente/9.
 :- consult(menu).
 :- consult(list_utils).
-% :- consult(input).
 :- consult(questionario).
 :- consult(graficos).
 
+% ---------------------
+% Estrutura dos fatos :
+% ---------------------
 % cliente(nome,
 %         saldo,
 %         renda_mensal, 
@@ -23,6 +25,8 @@
             % perfil)
 
 %  @TODO: Substituir estes valores com os valores reais (se nao forem os reais, estipular alguns)
+
+% aplicações
 aplicacao(cdb, 6, 36, 5000, agressivo).
 aplicacao(lci, 6, 36, 5000, agressivo).
 aplicacao(tesouro_selic,1, 0, 30, conservador).
@@ -30,20 +34,32 @@ aplicacao(tesouro_ipca, 5, 12,1000, moderado).
 aplicacao(poupanca, 0, 999,0, nao_recomendado).
 nomes_aplicacoes([cdb,lci, tesouro_selic, tesouro_ipca, poupanca]).
 aplicacoes_para_fundo_emergencia([tesouro_selic,cdb]).
+
 % Testei cor a cor até chegar nessas
 cores([red,blue,green,yellow,gray,black,brown,cyan,violet]).
 
-% cliente(ronaldinho,5000,1000,5,12,[cdb,poupanca],[1000,20],conservador).
-cliente(ronaldinho,7000,1000,1,12,[cdb,poupanca],[1000,20],conservador,500).
+% clientes
 
+cliente(ronaldinho,7000,1000,1,12,[cdb,poupanca],[1000,20],conservador,500).
+cliente(claudia,500,200,0,48,[poupanca],[50],nenhum,500).
+cliente(juliana,3000,1000,2,36,[tesouro_selic],[5000],conservador,500).
+cliente(bettina,70000,5000,0,12,[cdb,lci, tesouro_selic, tesouro_ipca],[10000,10000,10000,10000],agressivo,500).
+cliente(robson,2000,3000,0,12,[cdb],[5000,20],moderado,500).
+
+% renda mínima para cada dependente
 minimo_dependente(500).
 
+% -------------------------------------------------------------------
+
 /**
- * Regra
- * 
- * 
- * 
- * 
+ * Regra que verifica se um cliente possui fundo de emergência e, se possuir, sugere aplicar
+ * em investimentos que sejam de seu perfil, de modo diversificado. Caso contrário, se não
+ * possuir, sugere investir nas aplicações que garantem um fundo de emergência futuro.
+ * @param:
+ *      VALOR_INVEST =  (int/float) valor a ser investido
+ *      PRAZO_RETORNO = (int/float) prazo de retorno do investimento
+ *      PERFIL =    perfil do cliente
+ *      CLIENTE =   nome do cliente
  * 
 **/
 
@@ -222,12 +238,11 @@ retorna_lista_valores_atualizados([H|Tail],[H1|T1],A,VAL,[H1|Result]):-  % Coloc
 
 
 /**
- * 
- * 
- * 
- * 
- * 
- * 
+ * Regra que retorna uma lista que um cliente pode investir com base no valor a ser investido
+ * @param:
+ *      Lista = Lista de aplicações
+ *      VAL = (int/float) Valor a ser investido
+ *      Lista1 = Lista com o resultado das aplicações
  * 
 **/
 
@@ -240,16 +255,24 @@ retorna_lista_valor_p_investir_menor_saldo([H|Tail],VAL,[H|Result]):-  % Coloca 
     retorna_lista_valor_p_investir_menor_saldo(Tail,VAL,Result).              %prossegue para o filh
 
 
-%@TODO: TROCAR ESSE PELO RETORNA_LISTA_VALOR_P_INVESTIR_MENOR_SALDO.
-% Retorna uma lista de onde o cliente poderá aplicar
-verif_pode_aplicar(_, _, _, [], AUX, AUX).
+/**
+ * Regra que retorna uma lista que um cliente 
+ * pode investir com base no valor a ser investido 
+ * e no prazo de retorno do mesmo e em seu perfil
+ * 
+ * @param:
+ *      Lista = Lista de aplicações
+ *      VAL = (int/float) Valor a ser investido
+ *      Lista1 = Lista com o resultado das aplicações
+ * 
+**/
 
+verif_pode_aplicar(_, _, _, [], AUX, AUX).
 verif_pode_aplicar(VALOR_INVEST, PRAZO_RETORNO, PERFIL, [H|T], LISTA_ONDE, AUX):-
     aplicacao(H, _, P_R, VAL, PERFIL),
     VALOR_INVEST >= VAL,
     PRAZO_RETORNO >= P_R,
     verif_pode_aplicar(VALOR_INVEST, PRAZO_RETORNO, PERFIL, T, LISTA_ONDE, [H|AUX]),!.
-
 verif_pode_aplicar(VALOR_INVEST, PRAZO_RETORNO, PERFIL, [_|T], LISTA_ONDE, AUX):-
     verif_pode_aplicar(VALOR_INVEST, PRAZO_RETORNO, PERFIL, T, LISTA_ONDE, AUX),!.
 

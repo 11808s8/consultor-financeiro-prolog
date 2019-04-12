@@ -1,4 +1,10 @@
 
+/**
+ * 
+ * Regra com o menu de exibição do programa
+ * 
+ * 
+ **/
 menu():-
     nl,
     write(" Menu do programa: "),
@@ -27,6 +33,13 @@ menu():-
     opc(X),
     menu().
 
+/**
+ * 
+ * Regras para opções do menu de execução do programa
+ * @param:
+ *      X = número da opção escolhida
+ * 
+ **/
 opc(X):-
     X = 0,
     halt.
@@ -131,26 +144,23 @@ opc(X):-
     quanto_lucrarei(C).
     
 
-
+/**
+ * Regra para encapsular a leitura do nome do cliente
+ * @param:
+ *  C = nome do cliente a ser validado
+ * 
+ **/
 leitura_nome_cliente(C):-
     write("Digite o nome do cliente. Exemplo: ronaldinho_gaucho."),
     nl,
     read(C),
     valida_nome_cliente(C).
-    
-% cliente(nome,
-%         saldo,
-%         renda_mensal, 
-%         dependentes,
-%         prazo_retorno_investimento,
-%         [aplicacoes],
-%         [quantia_aplicada_em_cada_aplicacao],
-%         perfil,
-%         despesa)
 
+/**
+ * 
+ * Regra para a validação de um cliente
+ * @param:
+ *      C = nome do cliente a ser validado
+ **/
 valida_nome_cliente(C):-
     cliente(C,_,_,_,_,_,_,_,_).
-
-
-teste():-
-    write("Olá mundo").

@@ -1,3 +1,13 @@
+
+/**
+ * 
+ * Regra que aplica uma adaptação do questionário encontrado em: https://www.infomoney.com.br/blogs/financas-pessoais/financas-em-casa/post/5306053/qual-seu-perfil-investidor
+ *  Subsequentes regras servem para validação do questionário, quantificação de respostas e montagem do gráfico
+ *  @param:
+ *      CLIENTE = Nome do cliente
+ * 
+**/
+
 questionario_perfil(CLIENTE):-
     cliente(CLIENTE,_,_,_,_,_,_,PERFIL,_),
     nl,
@@ -88,6 +98,12 @@ questionario_perfil(CLIENTE):-
     pergunta_adicionar_perfil_a_base(CLIENTE,PERFIL, NOVO_PERFIL).
     
 
+/**
+ * @param:
+ *    CLIENTE = Nome do cliente
+ *    PERFIL = Perfil do cliente
+ *    NOVO_PERFIL = Perfil retornado pela próxima regra a ser chamada
+**/
 pergunta_adicionar_perfil_a_base(CLIENTE, PERFIL, NOVO_PERFIL):-
     nl,
     write("Deseja adicionar o perfil de investimento ao seu perfil?(s/n)"),
@@ -95,9 +111,16 @@ pergunta_adicionar_perfil_a_base(CLIENTE, PERFIL, NOVO_PERFIL):-
     read(RESP),
     prepara_adicionar_perfil_a_base(RESP, CLIENTE, PERFIL, NOVO_PERFIL),!.
 
+/**
+ * @param:
+ *    RESP    = Resposta da regra anterior
+ *    CLIENTE = Nome do cliente
+ *    PERFIL = Perfil do cliente
+ *    NOVO_PERFIL = Perfil retornado pela próxima regra a ser chamada
+**/
 prepara_adicionar_perfil_a_base(RESP, CLIENTE, PERFIL,NOVO_PERFIL):-
     RESP = s,
-    PERFIL \= "",
+    PERFIL \= nenhum,
     nl,
     write("Seu perfil já possui o perfil de investimento "),
     write(PERFIL),
@@ -107,13 +130,11 @@ prepara_adicionar_perfil_a_base(RESP, CLIENTE, PERFIL,NOVO_PERFIL):-
     nl,
     read(SOBRESCREVER),
     prepara_sobrescrever_adicionar_perfil_a_base(SOBRESCREVER, CLIENTE, NOVO_PERFIL),!.
-
 prepara_adicionar_perfil_a_base(RESP, CLIENTE, PERFIL,NOVO_PERFIL):-
     RESP = s,
     PERFIL = "", % teste redundante...
     nl,
     prepara_sobrescrever_adicionar_perfil_a_base(s, CLIENTE, NOVO_PERFIL).
-
 prepara_adicionar_perfil_a_base(RESP, CLIENTE, PERFIL,NOVO_PERFIL):-
     RESP = n,
     nl,
@@ -139,7 +160,16 @@ respostas_questionario(RESPOSTAS,A,B,C, NOVO_PERFIL):-
     quantifica_respostas_questionarios(RESPOSTAS,A,B,C),
     compara_respostas(A,B,C,NOVO_PERFIL).
 
-% @TODO: Adicionar TEXTO sobre perfis
+
+% Comparações de respostas
+
+/**
+ * @param:
+ *    A = Quantidade de respostas da opção A
+ *    B = Quantidade de respostas da opção B
+ *    C = Quantidade de respostas da opção C
+ *    AUX = Perfil retornado
+**/
 compara_respostas(A,B,C,AUX):-
     A>B,
     A>C,
