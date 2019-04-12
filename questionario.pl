@@ -1,3 +1,13 @@
+
+/**
+ * 
+ * Regra que aplica uma adaptação do questionário encontrado em: https://www.infomoney.com.br/blogs/financas-pessoais/financas-em-casa/post/5306053/qual-seu-perfil-investidor
+ *  Subsequentes regras servem para validação do questionário, quantificação de respostas e montagem do gráfico
+ *  @param:
+ *      CLIENTE = Nome do cliente
+ * 
+**/
+
 questionario_perfil(CLIENTE):-
     cliente(CLIENTE,_,_,_,_,_,_,PERFIL,_),
     nl,
@@ -83,34 +93,48 @@ questionario_perfil(CLIENTE):-
     nl,
     respostas_questionario([UM,DOIS,TRES,QUATRO,CINCO],A,B,C, NOVO_PERFIL),
     nl,
-    % prepara_grafico_questionario([UM,DOIS,TRES,QUATRO,CINCO], A,B,C),
+    prepara_grafico_questionario([UM,DOIS,TRES,QUATRO,CINCO], A,B,C),
     nl,
     pergunta_adicionar_perfil_a_base(CLIENTE,PERFIL, NOVO_PERFIL).
     
 
+/**
+ * @param:
+ *    CLIENTE = Nome do cliente
+ *    PERFIL = Perfil do cliente
+ *    NOVO_PERFIL = Perfil retornado pela próxima regra a ser chamada
+**/
 pergunta_adicionar_perfil_a_base(CLIENTE, PERFIL, NOVO_PERFIL):-
     nl,
     write("Deseja adicionar o perfil de investimento ao seu perfil?(s/n)"),
+    nl,
     read(RESP),
     prepara_adicionar_perfil_a_base(RESP, CLIENTE, PERFIL, NOVO_PERFIL),!.
 
+/**
+ * @param:
+ *    RESP    = Resposta da regra anterior
+ *    CLIENTE = Nome do cliente
+ *    PERFIL = Perfil do cliente
+ *    NOVO_PERFIL = Perfil retornado pela próxima regra a ser chamada
+**/
 prepara_adicionar_perfil_a_base(RESP, CLIENTE, PERFIL,NOVO_PERFIL):-
     RESP = s,
-    PERFIL \= "",
+    PERFIL \= nenhum,
     nl,
     write("Seu perfil já possui o perfil de investimento "),
     write(PERFIL),
-    write(" atrelado a ele. Deseja sobrescrevê-lo? (s/n)"),
+    write(" atrelado a ele, "),
+    write(CLIENTE),
+    write(". Deseja sobrescrevê-lo? (s/n)"),
     nl,
     read(SOBRESCREVER),
     prepara_sobrescrever_adicionar_perfil_a_base(SOBRESCREVER, CLIENTE, NOVO_PERFIL),!.
-
 prepara_adicionar_perfil_a_base(RESP, CLIENTE, PERFIL,NOVO_PERFIL):-
     RESP = s,
     PERFIL = "", % teste redundante...
     nl,
     prepara_sobrescrever_adicionar_perfil_a_base(s, CLIENTE, NOVO_PERFIL).
-
 prepara_adicionar_perfil_a_base(RESP, CLIENTE, PERFIL,NOVO_PERFIL):-
     RESP = n,
     nl,
@@ -136,22 +160,31 @@ respostas_questionario(RESPOSTAS,A,B,C, NOVO_PERFIL):-
     quantifica_respostas_questionarios(RESPOSTAS,A,B,C),
     compara_respostas(A,B,C,NOVO_PERFIL).
 
-% @TODO: Adicionar TEXTO sobre perfis
+
+% Comparações de respostas
+
+/**
+ * @param:
+ *    A = Quantidade de respostas da opção A
+ *    B = Quantidade de respostas da opção B
+ *    C = Quantidade de respostas da opção C
+ *    AUX = Perfil retornado
+**/
 compara_respostas(A,B,C,AUX):-
     A>B,
     A>C,
     AUX = conservador,
-    write("Conservador").
+    write("Você tirou perfil Conservador. Parece que você não gosta de correr riscos ou busca por rendas estáveis a um curto/médio prazo").
 compara_respostas(A,B,C,AUX):-
     B>A,
     B>C,
     AUX = moderado,
-    write("Moderado").
+    write("Você tirou perfil Moderado. Parece que você busca um lucro acima do normal, sem correr tantos riscos em uma aplicação agressiva.").
 compara_respostas(A,B,C,AUX):-
     C>A,
     C>B,
     AUX = agressivo,
-    write("Agressivo").
+    write("Você tirou perfil Agressivo. Você busca um lucro elevado, acima dos perfis Moderado e Conservador, mesmo que eventualmente ocorram perdas do capital investido.").
 % compara_respostas(A,B,C,AUX):-
 %     A=B,
 %     AUX = d,
@@ -165,6 +198,17 @@ compara_respostas(A,B,C,AUX):-
 %     AUX = f,
 %     write("Conservador e agressivo."). % ac
     
+
+
+/**
+ * Regra que contabiliza a quantidade de resposta 'a', 'b' e 'c'
+ * escolhidas pelo usuário.
+ * @param:
+ *      LISTA_RESPOSTAS = Lista de respostas do cliente para o questionário
+ *      A = Variável auxiliar a qual possuirá o retorno com a SOMA das respostas 'a'
+ *      B = Variável auxiliar a qual possuirá o retorno com a SOMA das respostas 'b'
+ *      C = Variável auxiliar a qual possuirá o retorno com a SOMA das respostas 'c'
+**/
 quantifica_respostas_questionarios([],0,0,0).
 quantifica_respostas_questionarios([H|T],A,B,C):-
     H=a,
