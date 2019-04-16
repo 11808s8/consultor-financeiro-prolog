@@ -27,11 +27,11 @@
 %  @TODO: Substituir estes valores com os valores reais (se nao forem os reais, estipular alguns)
 
 % aplicações
-aplicacao(cdb, 6, 36, 5000, agressivo).
+aplicacao(cdb, 6, 36, 1000, agressivo).
 aplicacao(lci, 6, 36, 5000, agressivo).
-aplicacao(tesouro_selic,1, 0, 30, conservador).
+aplicacao(tesouro_selic,1.6, 0, 30, conservador).
 aplicacao(tesouro_ipca, 5, 12,1000, moderado).
-aplicacao(poupanca, 0, 999,0, nao_recomendado).
+aplicacao(poupanca, 0.6, 999,0, nao_recomendado).
 nomes_aplicacoes([cdb,lci, tesouro_selic, tesouro_ipca, poupanca]).
 aplicacoes_para_fundo_emergencia([tesouro_selic,cdb]).
 
@@ -44,7 +44,8 @@ cliente(ronaldinho,7000,1000,1,12,[cdb,poupanca],[1000,20],conservador,500).
 cliente(claudia,500,200,0,48,[poupanca],[50],nenhum,500).
 cliente(juliana,3000,1000,2,36,[tesouro_selic],[5000],conservador,500).
 cliente(bettina,70000,5000,0,12,[cdb,lci, tesouro_selic, tesouro_ipca],[10000,10000,10000,10000],agressivo,500).
-cliente(robson,2000,3000,0,12,[cdb],[5000,20],moderado,500).
+cliente(robson,2000,3000,0,12,[cdb,poupanca],[5000,20],moderado,500).
+cliente(humberto,35000,10000,2,36,[tesouro_selic,cdb],[1000,2000],agressivo,5000).
 
 % renda mínima para cada dependente
 minimo_dependente(500).
@@ -94,12 +95,6 @@ onde_pode_aplicar(VALOR_INVEST,PRAZO_RETORNO,PERFIL, CLIENTE):-
     cliente(CLIENTE,_,_,DEPENDENTES,_,APLIC,QT_APLIC,_,DESPESA),
     calculo_fundo_emergencia(DEPENDENTES,APLIC,QT_APLIC,DESPESA, SOMA, DESPESA_TOTAL),
     SOMA >= DESPESA_TOTAL,
-    write(VALOR_INVEST),
-    nl,
-    write("Parabéns! Você já possui um montante suficiente em sua reserva de emergência."),
-    nl,
-    write("As opções para investimento são: "),
-    nl,
     nomes_aplicacoes(NOMES_APLICACOES),
     verif_pode_aplicar(VALOR_INVEST, PRAZO_RETORNO, PERFIL,NOMES_APLICACOES, LISTA_ONDE, _),
     tamanho_lista(LISTA_ONDE,TAM), 
@@ -117,12 +112,14 @@ onde_pode_aplicar(VALOR_INVEST,PRAZO_RETORNO,PERFIL, CLIENTE):-
 **/
 verificacao_tamanho_lista_pode_aplicar(TAM,LISTA_ONDE,CLIENTE,VALOR_INVEST):-
     TAM>0,
+    write("Parabéns! Você já possui um montante suficiente em sua reserva de emergência."),
+    nl,
+    write("As opções para investimento são: "),
+    nl,
     exibe_valores_lista(LISTA_ONDE),
     write("Deseja aplicar diversificado nestas aplicações?(s/n)"),
     nl,
     read(RESPOSTA),
-    write(RESPOSTA),
-    nl,
     pergunta_aplicar_diversificado_em(RESPOSTA,LISTA_ONDE, CLIENTE, VALOR_INVEST),!.
 verificacao_tamanho_lista_pode_aplicar(TAM,_,_,_):-
     TAM=<0,
@@ -149,9 +146,73 @@ pergunta_aplicar_diversificado_em(RESPOSTA,LISTA_ONDE, CLIENTE, SALDO):-
     nl,
     read(QUANTO),
     calcula_quanto(LISTA_ONDE, CLIENTE,QUANTO).
-pergunta_aplicar_diversificado_em(RESPOSTA,_, _,_):-
+pergunta_aplicar_diversificado_em(RESPOSTA,LISTA_ONDE, CLIENTE,SALDO):-
+    RESPOSTA = n,
+    write("Deseja escolher quais?(s/n)"),
+    nl,
+    read(RESPOSTA1),
+    pergunta_aplicar_escolhendo(RESPOSTA1,LISTA_ONDE, CLIENTE,SALDO),!.
+
+    
+pergunta_aplicar_escolhendo(RESPOSTA,LISTA_ONDE, CLIENTE,SALDO):-
     RESPOSTA = n,
     write("Tudo bem! Retornando ao menu"),!.
+pergunta_aplicar_escolhendo(RESPOSTA,LISTA_ONDE, CLIENTE,SALDO):-
+    RESPOSTA = s,
+    write("Liste as aplicações onde quer investir. (Exemplo: [tesouro_selic,cdb,lci])"),
+    nl,
+    write("É possível investir nestas aplicações:"),
+    nl,
+    write(LISTA_ONDE),
+    nl,
+    read(LISTA_ONDE_RESPOSTA),
+    write("Liste quanto quer investir nas aplicações, na mesma ordem que informou as aplicações."),
+    nl,
+    write(" (Exemplo: [3000,200,4000])"),
+    nl,
+    read(LISTA_QUANTO),
+    calcula_quanto_escolhido(LISTA_ONDE_RESPOSTA,CLIENTE,LISTA_QUANTO),!.
+
+/**
+ * Regra que calcula se o cliente pode efetivamente
+ * realizar algum investimento em uma aplicação com base no quanto informou e seu saldo
+ * @param:
+ *      LISTA_ONDE = Lista de aplicações onde o cliente fará os investimentos
+ *      CLIENTE = nome do cliente
+ *      LISTA_QUANTO = (int/float) Valor informado pelo usuário para realizar investimentos
+ * 
+**/
+calcula_quanto_escolhido(LISTA_ONDE, CLIENTE,LISTA_QUANTO):-
+    cliente(CLIENTE,SALDO,_,_,_,_,_,_,_),
+    soma_aplicacoes(LISTA_QUANTO,LISTA_ONDE,LISTA_QUANTO,SOMA),
+    SOMA=<SALDO,
+    aplicar_escolhido_em(LISTA_QUANTO,LISTA_ONDE,CLIENTE),
+    write("Aplicação realizada com sucesso!").
+calcula_quanto(_, CLIENTE,LISTA_QUANTO):-
+    cliente(CLIENTE,SALDO,_,_,_,_,_,_,_),
+    soma_aplicacoes(LISTA_QUANTO,LISTA_ONDE,LISTA_QUANTO,SOMA),
+    SOMA>SALDO,
+    write("Você não possui esta quantia! Seu saldo é de: "),
+    write("R$"),
+    write(SALDO).
+
+/**
+ * Regra que realiza a aplicação ESCOLHIDA PELO CLIENTE
+ * em N aplicações, com base no valor passado.
+ * @param:
+ *      VALOR_INVEST = (int/float) valor TOTAL a ser investido em aplicação
+ *      LISTA_ONDE = Lista de aplicações onde o cliente fará os investimentos
+ *      CLIENTE = nome do cliente
+ * 
+**/
+aplicar_escolhido_em(LISTA_VALOR, LISTA_ONDE, CLIENTE):-
+    tamanho_lista(LISTA_ONDE, TAM),
+    cliente(CLIENTE,SAL,REND,DEP,PRAZO,APLIC,QTD_APLIC,P,D),
+    retract(cliente(CLIENTE,_,_,_,_,_,_,_,_)),
+    aplicacoes_lista_cliente(APLIC,QTD_APLIC,LISTA_ONDE,LISTA_VALOR,QTD_RESULTADO,APLIC_RESULTADO),
+    soma_aplicacoes(LISTA_ONDE,LISTA_ONDE,LISTA_VALOR,SOMA),
+    SAL1 is SAL - SOMA,
+    assert(cliente(CLIENTE,SAL1,REND,DEP,PRAZO,APLIC_RESULTADO,QTD_RESULTADO,P,D)).
 
 /**
  * Regra que calcula se o cliente pode efetivamente
@@ -217,6 +278,15 @@ aplicacoes_lista_cliente(APLIC, QTD_APLIC,[ONDE|TONDE],VALOR_INVEST,QTD,APLIC_RE
     insere_lista(APLIC,ONDE,APLIC1),
     aplicacoes_lista_cliente(APLIC1, QTD1,TONDE,VALOR_INVEST,QTD,APLIC_RESULTADO),!.
 
+aplicacoes_lista_cliente(APLIC, QTD_APLIC,[ONDE|TONDE],[QUANTO|TQUANTO],QTD,APLIC_RESULTADO):-
+    member(ONDE,APLIC),
+    retorna_lista_valores_atualizados(APLIC,QTD_APLIC,ONDE,QUANTO,QTD_APLIC1),
+    aplicacoes_lista_cliente(APLIC, QTD_APLIC1,TONDE,TQUANTO,QTD,APLIC_RESULTADO),!.
+aplicacoes_lista_cliente(APLIC, QTD_APLIC,[ONDE|TONDE],[_|TQUANTO],QTD,APLIC_RESULTADO):-
+    not(member(ONDE,APLIC)),
+    insere_lista(QTD_APLIC,TQUANTO,QTD1),
+    insere_lista(APLIC,ONDE,APLIC1),
+    aplicacoes_lista_cliente(APLIC1, QTD1,TONDE,TQUANTO,QTD,APLIC_RESULTADO),!.
 /**
  * Regra que retorna uma lista de valores 
  * atualizados com a adição do valor anterior 
@@ -440,7 +510,7 @@ quanto_lucrarei(C):-
 verifica_todas_aplicacoes_lucro([],_).
 verifica_todas_aplicacoes_lucro([H|T],[H1|T1]):-
     aplicacao(H,REND,_,_,_),
-    V is H1 * REND,
+    V is H1 * (REND),
     write("Lucro para "),
     write(H),
     write(": R$ "),
