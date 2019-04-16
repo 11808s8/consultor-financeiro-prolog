@@ -41,7 +41,7 @@ grafico_questionario(A1,B1,C1, QTD_RESPOSTAS) :-
  * 
  **/
 grafico_aplicacoes(LISTA_MEMBROS,TOTAL) :-
-    new(W,  auto_sized_picture('Respostas do Questionário')),
+    new(W,  auto_sized_picture('Investimentos Realizados')),
     send(W, display, new(BC, bar_chart(horizontal,0,TOTAL))),
     forall(member(Name/Height/Color,
               LISTA_MEMBROS),

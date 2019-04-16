@@ -66,6 +66,7 @@ opc(X):-
     leitura_nome_cliente(C),
     cliente(C,_,_,_, _, _, _, _,_), 
     questionario_perfil(C).
+    
 
 opc(X):-
     X = 5,
@@ -97,7 +98,15 @@ opc(X):-
     nl,
     write("Despesas mensais:"),
     write(DESPESA),
-    nl.
+    nl,!.
+    
+opc(X):-
+    X = 5,
+    write("Que pena, não há sequer um cliente com este nome. "),
+    nl,
+    write("Retornando ao menu!"),
+    nl,!.
+    
 
 opc(X):-
     X = 6,
@@ -130,7 +139,7 @@ opc(X):-
     read(DESPESA),
     assert(cliente(C,SALDO,RENDA_MENSAL,DEPENDENTES,PRAZO_RETORNO,APLICACOES,QUANTIA,PERFIL,DESPESA)),
     write("Usuário adicionado com sucesso!"),
-    nl. 
+    nl,!. 
 
 opc(X):-
     X = 7,

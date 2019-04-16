@@ -132,10 +132,10 @@ prepara_adicionar_perfil_a_base(RESP, CLIENTE, PERFIL,NOVO_PERFIL):-
     prepara_sobrescrever_adicionar_perfil_a_base(SOBRESCREVER, CLIENTE, NOVO_PERFIL),!.
 prepara_adicionar_perfil_a_base(RESP, CLIENTE, PERFIL,NOVO_PERFIL):-
     RESP = s,
-    PERFIL = "", % teste redundante...
+    PERFIL = nenhum, % teste redundante...
     nl,
     prepara_sobrescrever_adicionar_perfil_a_base(s, CLIENTE, NOVO_PERFIL).
-prepara_adicionar_perfil_a_base(RESP, CLIENTE, PERFIL,NOVO_PERFIL):-
+prepara_adicionar_perfil_a_base(RESP, _, _,_):-
     RESP = n,
     nl,
     write("Sem problemas! Retornando ao menu.").
@@ -147,7 +147,7 @@ prepara_sobrescrever_adicionar_perfil_a_base(SOBRESCREVER, CLIENTE, NOVO_PERFIL)
     assert(cliente(CLIENTE,A,B,C,D,E,F,NOVO_PERFIL,G)),
     nl,
     write("Perfil de investimento alterado com sucesso!").
-prepara_sobrescrever_adicionar_perfil_a_base(SOBRESCREVER, CLIENTE, NOVO_PERFIL):-
+prepara_sobrescrever_adicionar_perfil_a_base(SOBRESCREVER, _, _):-
     SOBRESCREVER = n,
     nl,
     write("Sem problemas! Retornando ao menu.").
