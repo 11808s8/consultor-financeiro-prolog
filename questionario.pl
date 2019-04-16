@@ -132,7 +132,7 @@ prepara_adicionar_perfil_a_base(RESP, CLIENTE, PERFIL,NOVO_PERFIL):-
     prepara_sobrescrever_adicionar_perfil_a_base(SOBRESCREVER, CLIENTE, NOVO_PERFIL),!.
 prepara_adicionar_perfil_a_base(RESP, CLIENTE, PERFIL,NOVO_PERFIL):-
     RESP = s,
-    PERFIL = "", % teste redundante...
+    PERFIL = nenhum, % teste redundante...
     nl,
     prepara_sobrescrever_adicionar_perfil_a_base(s, CLIENTE, NOVO_PERFIL).
 prepara_adicionar_perfil_a_base(RESP, _, _,_):-
