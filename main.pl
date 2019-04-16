@@ -124,7 +124,7 @@ verificacao_tamanho_lista_pode_aplicar(TAM,LISTA_ONDE,CLIENTE,VALOR_INVEST):-
     write(RESPOSTA),
     nl,
     pergunta_aplicar_diversificado_em(RESPOSTA,LISTA_ONDE, CLIENTE, VALOR_INVEST),!.
-verificacao_tamanho_lista_pode_aplicar(TAM,LISTA_ONDE,CLIENTE,VALOR_INVEST):-
+verificacao_tamanho_lista_pode_aplicar(TAM,_,_,_):-
     TAM=<0,
     write("Não é possível investir em sequer uma aplicação!"),
     nl,
@@ -206,7 +206,7 @@ aplicar_diversificado_em(VALOR_INVEST, LISTA_ONDE, CLIENTE):-
  *      APLIC_RESULTADO = Lista com as novas aplicações
  * 
 **/
-aplicacoes_lista_cliente(APLIC, QTD,[],VALOR_INVEST,QTD,APLIC).
+aplicacoes_lista_cliente(APLIC, QTD,[],_,QTD,APLIC).
 aplicacoes_lista_cliente(APLIC, QTD_APLIC,[ONDE|TONDE],VALOR_INVEST,QTD,APLIC_RESULTADO):-
     member(ONDE,APLIC),
     retorna_lista_valores_atualizados(APLIC,QTD_APLIC,ONDE,VALOR_INVEST,QTD_APLIC1),
@@ -233,7 +233,7 @@ retorna_lista_valores_atualizados([H|T],[H1|T1],A,VAL,[H2|Result]):-
     H = A,          % se forem iguais, adicionará o valor dele + VAL em uma variável nova
     H2 is VAL + H1, % e então colocará H2 nesta posição da lista, no retorno
     retorna_lista_valores_atualizados(T,T1,A,VAL,Result),!.                
-retorna_lista_valores_atualizados([H|Tail],[H1|T1],A,VAL,[H1|Result]):-  % Coloca o valor normal
+retorna_lista_valores_atualizados([_|Tail],[H1|T1],A,VAL,[H1|Result]):-  % Coloca o valor normal
     retorna_lista_valores_atualizados(Tail,T1,A,VAL,Result).              %prossegue para o filho
 
 
@@ -439,7 +439,7 @@ quanto_lucrarei(C):-
 **/
 verifica_todas_aplicacoes_lucro([],_).
 verifica_todas_aplicacoes_lucro([H|T],[H1|T1]):-
-    aplicacao(H,REND,MESES,_,_),
+    aplicacao(H,REND,_,_,_),
     V is H1 * REND,
     write("Lucro para "),
     write(H),
