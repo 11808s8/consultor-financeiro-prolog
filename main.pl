@@ -331,9 +331,12 @@ retorna_lista_valor_p_investir_menor_saldo([H|Tail],VAL,[H|Result]):-  % Coloca 
  * e no prazo de retorno do mesmo e em seu perfil
  * 
  * @param:
- *      Lista = Lista de aplicações
- *      VAL = (int/float) Valor a ser investido
- *      Lista1 = Lista com o resultado das aplicações
+ *      VALOR_INVEST = Valor a ser investido
+ *      PRAZO_RETORNO = Prazo de retorno esperado
+ *      PERFIL = Perfil de investidor do cliente
+ *      LISTA = Lista de aplicações
+ *      LISTA_ONDE = lista onde será retornado o valor da lista onde o cliente pode aplicar
+ *      AUX = Variável auxiliar para montar a LISTA_ONDE
  * 
 **/
 
